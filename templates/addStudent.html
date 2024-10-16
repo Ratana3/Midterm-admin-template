@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Form Layout with Popup</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-top: 30px; /* This adds space above each form group */
+        }
+
+        .form-group:first-of-type {
+            margin-top: 0; /* Remove margin-top from the first form group */
+        }
+
+        .form-group label {
+            flex: 0 0 150px;
+            margin-right: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin-top: 20px;
+            position: center;
+        }
+
+        button[type="submit"]:hover {
+            background-color: darkblue;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        button.delete,
+        button.edit {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        button.edit {
+            background-color: #ffc107;
+        }
+
+        button.delete:hover {
+            background-color: #c82333;
+        }
+
+        button.edit:hover {
+            background-color: #e0a800;
+        }
+
+        /* Popup Styling */
+        .error-popup {
+            position: absolute;
+            top: 100%;
+            left: 160px;
+            background-color: red;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .form-group.invalid .error-popup {
+            display: block;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .modal-content button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+
+        .modal-content button.cancel {
+            background-color: #dc3545;
+        }
+
+        .modal-content button:hover {
+            opacity: 0.8;
+        }
+
+        .modal-content button.cancel:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>User Information Form</h2>
+        <div class="form-container">
+            <form>
+                <div class="form-group" id="name-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name">
+                    <div class="error-popup">Please fill out the Name field.</div>
+                </div>
+                <div class="form-group" id="gender-group">
+                    <label for="gender">Gender</label>
+
+                    <select id="gender" name="gender">
+                        <option value="">Select Gender</option>
+                        <option value="male">M</option>
+                        <option value="female">F</option>
+                    </select>
+                    <div class="error-popup">Please select a Gender.</div>
+                </div>
+                <div class="form-group" id="phone-group">
+                    <label for="phone">Phone</label>
+                    <input type="text" id="phone" name="phone">
+                    <div class="error-popup">Please fill out the Phone field.</div>
+                </div>
+                <div class="form-group" id="email-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email">
+                    <div class="error-popup">Please fill out the Email field.</div>
+                </div>
+                <button type="submit">Add</button>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table rows will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal for delete confirmation -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <p>Are you sure you want to delete this row?</p>
+            <button onclick="confirmDelete()">Confirm</button>
+            <button class="cancel" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let rowToDelete;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('form');
+            const tableBody = document.querySelector('table tbody');
+
+            form.onsubmit = function (e) {
+                e.preventDefault();
+
+                const name = document.getElementById('name');
+                const gender = document.getElementById('gender');
+                const phone = document.getElementById('phone');
+                const email = document.getElementById('email');
+
+                // Check if any field is empty and show popup if necessary
+                let valid = true;
+
+                if (!name.value) {
+                    showPopup(name, "name-group");
+                    valid = false;
+                } else {
+                    hidePopup("name-group");
+                }
+
+                if (!gender.value) {
+                    showPopup(gender, "gender-group");
+                    valid = false;
+                } else {
+                    hidePopup("gender-group");
+                }
+
+                if (!phone.value) {
+                    showPopup(phone, "phone-group");
+                    valid = false;
+                } else {
+                    hidePopup("phone-group");
+                }
+
+                if (!email.value) {
+                    showPopup(email, "email-group");
+                    valid = false;
+                } else {
+                    hidePopup("email-group");
+                }
+
+                if (!valid) {
+                    return;
+                }
+
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${tableBody.rows.length + 1}</td>
+                    <td>${name.value}</td>
+                    <td>${gender.value}</td>
+                    <td>${phone.value}</td>
+                    <td>${email.value}</td>
+                    <td>
+                        <button class="delete" onclick="openModal(this)">Delete</button>
+                        <button class="edit" onclick="editRow(this)">Edit</button>
+                    </td>
+                `;
+
+                tableBody.appendChild(newRow);
+                form.reset();
+            };
+        });
+
+        function showPopup(inputElement, groupId) {
+            document.getElementById(groupId).classList.add("invalid");
+        }
+
+        function hidePopup(groupId) {
+            document.getElementById(groupId).classList.remove("invalid");
+        }
+
+        function openModal(button) {
+            rowToDelete = button.parentNode.parentNode;
+            document.getElementById('myModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+
+        function confirmDelete() {
+            rowToDelete.remove();
+            closeModal();
+
+            const rows = document.querySelectorAll('table tbody tr');
+            rows.forEach((row, index) => {
+                row.cells[0].innerText = index + 1;
+            });
+            document.querySelector('form').reset(); // Clear the input fields after deletion
+        }
+
+        function editRow(button) {
+            const row = button.parentNode.parentNode;
+            const cells = row.querySelectorAll('td');
+
+            document.getElementById('name').value = cells[1].innerText;
+            document.getElementById('gender').value = cells[2].innerText;
+            document.getElementById('phone').value = cells[3].innerText;
+            document.getElementById('email').value = cells[4].innerText;
+
+            document.querySelector('form').onsubmit = function (e) {
+                e.preventDefault();
+
+                cells[1].innerText = document.getElementById('name').value;
+                cells[2].innerText = document.getElementById('gender').value;
+                cells[3].innerText = document.getElementById('phone').value;
+                cells[4].innerText = document.getElementById('email').value;
+
+                document.querySelector('form').reset(); // Clear the input fields after editing
+            };
+        }
+    </script>
+</body>
+
+</html>

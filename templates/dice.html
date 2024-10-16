@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Form Layout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        /* 6 columns grid for larger images */
+        .grid-large {
+            grid-template-columns: repeat(6, 1fr);
+        }
+
+        /* 3 columns grid for smaller images */
+        .grid-small {
+            grid-template-columns: repeat(3, 1fr);
+            margin-top: 20px;
+        }
+
+        .grid-item {
+            background-color: #fafafa;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            position: relative;
+            transition: background-color 0.5s;
+        }
+
+        .grid-item.green-bg {
+            background-color: darkgreen;
+        }
+
+        .grid-item img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+
+        .number-stack {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(255, 0, 0, 0.8);
+            color: white;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 14px;
+            line-height: 1;
+            font-weight: bold;
+        }
+
+        /* Currency display */
+        .currency-display {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Button styles */
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            background-color: #004080;
+            transform: scale(0.95);
+        }
+
+        button:focus {
+            outline: none;
+            box-shadow: 0px 0px 5px #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <h2>ខ្លាឃោ្លក</h2>
+        {% raw %}
+        <!-- Currency Display -->
+        <div class="currency-display">
+            ចំនួនលុយ : {{ currency }} 💸
+        </div>
+
+        <!-- 6 Columns Grid -->
+        <div class="grid grid-large">
+            <div
+                class="grid-item"
+                v-for="(item, index) in gridItems"
+                :key="index"
+                @click="addBet(index)"
+                :class="{ 'green-bg': item.isGreen }">
+                <img :src="item.src" :alt="'Image ' + (index + 1)">
+                <div class="number-stack" v-if="item.count > 0">
+                    Bet: {{ item.count }}
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Smaller Columns Grid -->
+        <div class="grid grid-small">
+            <div
+                class="grid-item"
+                v-for="(smallItem, sIndex) in smallGridItems"
+                :key="sIndex">
+                <img :src="smallItem.src" :alt="'Small Image ' + (sIndex + 1)">
+                <div class="number-stack" v-if="smallItem.count > 0">
+                    Bet: {{ smallItem.count }}
+                </div>
+            </div>
+            {% endraw %}
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-container">
+            <button type="button" @click="startGame">Start</button>
+            <button type="button" @click="clearBet">Clear Bet</button>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="clickSound" src="../static/slider/click.mp3"></audio>
+    <audio id="endSound" src="../static/slider/success.mp3"></audio>
+    <audio id="backgroundMusic" src="../static/slider/background-music.mp3" loop></audio>
+    <audio id="startClickSound" src="../static/slider/error.mp3"></audio>
+    <audio id="clearClickSound" src="../static/slider/error.mp3"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                gridItems: [
+                    { src: '../static/slider/1.jpg', count: 0, isGreen: false },
+                    { src: '../static/slider/2.jpg', count: 0, isGreen: false },
+                    { src: '../static/slider/3.jpg', count: 0, isGreen: false },
+                    { src: '../static/slider/4.jpg', count: 0, isGreen: false },
+                    { src: '../static/slider/5.jpg', count: 0, isGreen: false },
+                    { src: '../static/slider/6.jpg', count: 0, isGreen: false }
+                ],
+                smallGridItems: [
+                    { src: '../static/slider/1.jpg', count: 0 },
+                    { src: '../static/slider/1.jpg', count: 0 },
+                    { src: '../static/slider/1.jpg', count: 0 }
+                ],
+                currency: 10
+            },
+            methods: {
+                addBet(index) {
+                    if (this.gridItems[index].count < 10 && this.currency > 0) {
+                        this.gridItems[index].count += 1;
+                        this.currency -= 1; // Deduct 1 from currency for each bet
+                        this.playSound('clickSound'); // Play click sound
+                    }
+                },
+                startGame() {
+                    this.playSound('startClickSound'); // Play start button click sound
+                    this.playSound('backgroundMusic'); // Start background music
+                    this.randomizeGreenBackground();
+                },
+                clearBet() {
+                    this.playSound('clearClickSound'); // Play clear bet button click sound
+
+                    // Collect bets from the small grid items and reset them
+                    const totalSmallGridBets = this.smallGridItems.reduce((acc, item) => acc + item.count, 0);
+
+                    // Find matching images between large and small grids
+                    const smallGridSrcs = this.smallGridItems.map(item => item.src);
+                    const totalLargeGridBets = this.gridItems
+                        .filter(item => smallGridSrcs.includes(item.src))
+                        .reduce((acc, item) => acc + item.count, 0);
+
+                    // Update currency with collected bets
+                    this.currency += totalLargeGridBets + totalSmallGridBets;
+
+                    // Reset bets on both grids
+                    this.gridItems.forEach(item => item.count = 0);
+                    this.smallGridItems.forEach(item => item.count = 0);
+
+                    // Reset green background in large grid
+                    this.gridItems.forEach(item => item.isGreen = false);
+
+                    // Collect and reset bets from the large grid items that match the small grid
+                    const matchingBets = this.gridItems.filter(item =>
+                        this.smallGridItems.some(smallItem => smallItem.src === item.src)
+                    ).reduce((acc, item) => acc + item.count, 0);
+
+                    this.currency += matchingBets;
+                },
+                randomizeGreenBackground() {
+                    this.gridItems.forEach(item => item.isGreen = false);
+
+                    const indices = [];
+                    while (indices.length < 3) {
+                        const randomIndex = Math.floor(Math.random() * 6);
+                        if (!indices.includes(randomIndex)) {
+                            indices.push(randomIndex);
+                        }
+                    }
+
+                    indices.forEach(index => {
+                        this.gridItems[index].isGreen = true;
+                    });
+
+                    const intervalId = setInterval(() => {
+                        this.gridItems.forEach(item => item.isGreen = false);
+
+                        const newIndices = [];
+                        while (newIndices.length < 3) {
+                            const randomIndex = Math.floor(Math.random() * 6);
+                            if (!newIndices.includes(randomIndex)) {
+                                newIndices.push(randomIndex);
+                            }
+                        }
+
+                        newIndices.forEach(index => {
+                            this.gridItems[index].isGreen = true;
+                        });
+                    }, 1000);
+
+                    setTimeout(() => {
+                        clearInterval(intervalId);
+                        this.moveGreenImages();
+                        this.stopSound('backgroundMusic'); // Stop background music
+                        this.playSound('endSound'); // Play end of randomization sound
+                    }, 4000);
+                },
+                moveGreenImages() {
+                    const greenImages = this.gridItems.filter(item => item.isGreen);
+                    this.smallGridItems = greenImages.map(item => ({
+                        src: item.src,
+                        count: item.count
+                    }));
+                },
+                playSound(id) {
+                    const sound = document.getElementById(id);
+                    if (sound) {
+                        sound.currentTime = 0; // Reset sound to start
+                        sound.play();
+                    }
+                },
+                stopSound(id) {
+                    const sound = document.getElementById(id);
+                    if (sound) {
+                        sound.pause();
+                        sound.currentTime = 0; // Reset sound to start
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

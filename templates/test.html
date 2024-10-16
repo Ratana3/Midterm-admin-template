@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Ball Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #app {
+            text-align: center;
+        }
+        .ball {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: red;
+            position: absolute;
+            cursor: pointer;
+        }
+        .scoreboard {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .game-over {
+            font-size: 32px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="scoreboard">
+            Score: {{ score }} | Time Left: {{ timeLeft }}s
+        </div>
+        <div v-if="gameOver" class="game-over">
+            Game Over! Your score: {{ score }}
+        </div>
+        <div
+            v-for="(ball, index) in balls"
+            :key="index"
+            class="ball"
+            :style="{ top: ball.y + 'px', left: ball.x + 'px' }"
+            @click="catchBall(index)">
+        </div>
+        <button v-if="!gameStarted" @click="startGame">Start Game</button>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                score: 0, // Variable to store the player's score
+                timeLeft: 30, // Variable to store the time left
+                gameOver: false, // Variable to track game over state
+                gameStarted: false, // Variable to track game start state
+                balls: [] // Array to store the balls (Object: {x, y})
+            },
+            methods: {
+                // Method to start the game
+                startGame() {
+                    this.score = 0;
+                    this.timeLeft = 30;
+                    this.gameOver = false;
+                    this.gameStarted = true;
+                    this.balls = [];
+                    this.spawnBall();
+                    this.countdown();
+                },
+                // Method to spawn a ball at a random position
+                spawnBall() {
+                    if (this.gameOver) return;
+
+                    const ball = {
+                        x: Math.random() * (window.innerWidth - 50), // Random x position
+                        y: Math.random() * (window.innerHeight - 50) // Random y position
+                    };
+
+                    this.balls.push(ball);
+
+                    // Remove the ball after 1 second if not caught
+                    setTimeout(() => {
+                        this.balls.shift();
+                        this.spawnBall();
+                    }, 1000);
+                },
+                // Method to handle ball catching
+                catchBall(index) {
+                    this.score++;
+                    this.playSound();
+                    this.balls.splice(index, 1);
+                },
+                // Method for countdown timer
+                countdown() {
+                    const timer = setInterval(() => {
+                        if (this.timeLeft > 0) {
+                            this.timeLeft--;
+                        } else {
+                            clearInterval(timer);
+                            this.gameOver = true;
+                            this.gameStarted = false;
+                            this.balls = [];
+                        }
+                    }, 1000);
+                },
+                // Method to play a sound when a ball is caught
+                playSound() {
+                    const audio = new Audio('https://www.soundjay.com/button/beep-07.wav');
+                    audio.play();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dictionary</title>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Side Navigation Bar */
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            padding-top: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            overflow: auto;
+            color: white;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5em;
+            color: #ecf0f1;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .sidebar a:hover {
+            background-color: #34495e;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px; /* Sidebar width + margin */
+            padding: 40px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dictionary-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            padding: 25px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1.1em;
+        }
+
+        button {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #34495e;
+        }
+
+        .results-section {
+            margin-top: 20px;
+        }
+
+        .result {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .result h3 {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .result p {
+            font-size: 1.2em;
+            margin: 5px 0;
+        }
+
+        .result .part-of-speech {
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* Loading Overlay Styles */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(240, 240, 240, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        #loadingOverlay img {
+            width: 100px;
+            height: 100px;
+        }
+
+        /* Speaker icon */
+        .speaker-icon {
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 1.5em;
+            color: #2c3e50;
+        }
+
+        .speaker-icon:hover {
+            color: #34495e;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Side Navigation Bar -->
+    <div class="sidebar">
+        <h2>Dictionary</h2>
+        <a href="#search">Search Word</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+    </div>
+
+    <div class="main-content">
+        <div id="app" class="dictionary-container">
+            <div class="input-section">
+                <form action="/" method="POST">
+                    <label for="word">Enter a Word:</label>
+                    <input type="text" id="word" name="word" placeholder="Type a word...">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+
+            <div class="results-section">
+                {% if result %}
+                {% if result.error %}
+                <p>{{ result.error }}</p>
+                {% else %}
+                <div class="result">
+                    <h3>{{ result.word }}</h3>
+                    <p class="part-of-speech">{{ result.partOfSpeech }}</p>
+                    <p class="definition">{{ result.definition }}</p>
+                </div>
+                {% endif %}
+                {% else %}
+                <p>No result found. Please search for a word.</p>
+                {% endif %}
+            </div>
+
+            <div v-if="error" style="color:red">{{ error }}</div>
+        </div>
+    </div>
+
+    <!-- Vue.js and jQuery -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+
+    <!-- Main Vue.js Script -->
+    <script>
+    // Hide loading overlay once the page is fully loaded
+    window.addEventListener('load', function () {
+        document.getElementById('loadingOverlay').style.display = 'none';
+    });
+
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                word: '',  // Holds the user's input
+                result: null,  // Holds the API result
+                error: ''  // Holds any error message
+            };
+        },
+        methods: {
+            fetchMeaning() {
+                // Check if input is empty
+                if (this.word.trim() === "") {
+                    this.error = "Please enter a word!";
+                    return;
+                }
+
+                const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${this.word}`;
+                fetch(url)
+                    .then(response => {
+                        if (response.status === 200) {
+                            $.LoadingOverlay("show");
+                            return response.json();
+                        } else {
+                            throw new Error('Word not found');
+                        }
+                    })
+                    .then(data => {
+                        // Set the result with the first meaning and audio URL
+                        this.result = {
+                            partOfSpeech: data[0].meanings[0].partOfSpeech,
+                            definition: data[0].meanings[0].definitions[0].definition,
+                            audio: data[0].phonetics[0].audio  // Fetch audio URL from API response
+                        };
+                        this.error = '';  // Clear any previous errors
+
+                        // Set the audio source
+                        const audioPlayer = document.getElementById('audioPlayer');
+                        audioPlayer.src = this.result.audio;
+
+                        // Show the play button if there's an audio URL and set up the event listener
+                        const playAudioButton = document.getElementById('playAudio');
+                        if (this.result.audio) {
+                            playAudioButton.style.display = 'inline-block';
+
+                            // Add event listener to play audio on button click
+                            playAudioButton.addEventListener('click', function () {
+                                audioPlayer.play();
+                            });
+                        } else {
+                            playAudioButton.style.display = 'none';
+                        }
+
+                        $.LoadingOverlay("hide");
+                    })
+                    .catch(error => {
+                        this.error = error.message;
+                        this.result = null;  // Clear the result
+                        $.LoadingOverlay("hide");
+                    });
+            }
+        }
+    }).mount('#app');
+</script>
+</body>
+
+</html>

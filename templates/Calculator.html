@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #eef2f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .calculator {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+            padding: 25px;
+            width: 320px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+        }
+        .button-group button {
+            flex: 1;
+            padding: 10px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            margin: 0 5px;
+            cursor: pointer;
+            color: #fff;
+        }
+        .button-group button:first-child {
+            margin-left: 0;
+        }
+        .button-group button:last-child {
+            margin-right: 0;
+        }
+        .sum { background-color: #28a745; }
+        .minus { background-color: #dc3545; }
+        .multiply { background-color: #ffc107; }
+        .divide { background-color: #007bff; }
+        .button-group button:hover {
+            opacity: 0.85;
+        }
+        .result {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>Calculator</h1>
+        <div class="input-group">
+            <label for="value-a">Value A:</label>
+            <input type="number" id="value-a">
+        </div>
+        <div class="input-group">
+            <label for="value-b">Value B:</label>
+            <input type="number" id="value-b">
+        </div>
+        <div class="button-group">
+            <button class="sum">Sum</button>
+            <button class="minus">Minus</button>
+            <button class="multiply">Multiply</button>
+            <button class="divide">Divide</button>
+        </div>
+        <div class="result"></div>
+    </div>
+
+    <script>
+        // Select buttons and result display
+        const btnsum = document.querySelector(".sum");
+        const btnminus = document.querySelector(".minus");
+        const btnmultiply = document.querySelector(".multiply");
+        const btndivide = document.querySelector(".divide");
+        const result = document.querySelector(".result");
+
+        // Function to get input values and perform the calculation
+        function calculate(operation) {
+            // Fetch the latest values from the input fields
+            let a = parseFloat(document.getElementById('value-a').value) || 0;
+            let b = parseFloat(document.getElementById('value-b').value) || 0;
+            let calcResult;
+
+            // Perform calculation based on the operation
+            switch (operation) {
+                case 'sum':
+                    calcResult = a + b;
+                    break;
+                case 'minus':
+                    calcResult = a - b;
+                    break;
+                case 'multiply':
+                    calcResult = a * b;
+                    break;
+                case 'divide':
+                    calcResult = b !== 0 ? a / b : 'Error: Division by zero';
+                    break;
+                default:
+                    calcResult = 'Invalid operation';
+            }
+
+            // Display the result
+            result.innerText = "The result is: " + calcResult;
+        }
+
+        // Attach event listeners to buttons
+        btnsum.addEventListener("click", function () {
+            calculate('sum');
+        });
+        btnminus.addEventListener("click", function () {
+            calculate('minus');
+        });
+        btnmultiply.addEventListener("click", function () {
+            calculate('multiply');
+        });
+        btndivide.addEventListener("click", function () {
+            calculate('divide');
+        });
+
+    </script>
+</body>
+</html>
